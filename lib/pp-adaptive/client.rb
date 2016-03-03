@@ -12,6 +12,8 @@ module AdaptivePayments
     attribute :app_id,    String, :header => "X-PAYPAL-APPLICATION-ID"
     attribute :device_ip, String, :header => "X-PAYPAL-DEVICE-IPADDRESS"
 
+    attribute :checkout_type, String, :default => "desktop"
+
     # Initialize the client with the given options.
     #
     # Options can also be passed via the accessors, if prefered.
@@ -33,6 +35,10 @@ module AdaptivePayments
     #
     # @option [Boolean] sandbox
     #   true if using the sandbox, not production
+    #
+    # @option [String] checkout_type
+    #   Possibilities are "mobile" and "desktop". defaults to "desktop"
+
     def initialize(options = {})
       super
       self.sandbox = options[:sandbox]
@@ -41,6 +47,14 @@ module AdaptivePayments
     # Turn on/off sandbox mode.
     def sandbox=(flag)
       @sandbox = !!flag
+    end
+
+    # Test if the client is using the responsive mobile checkout.
+    #
+    # @return [Boolean]
+    #   true if using the responsive mobile checkout
+    def mobile?
+      checkout_type == "mobile"
     end
 
     # Test if the client is using the sandbox.
@@ -115,12 +129,12 @@ module AdaptivePayments
     # @return [String]
     #   the URL on paypal.com to send the user to
     def payment_url(response)
-      [
-        "https://www.",
-        ("sandbox." if sandbox?),
-        "paypal.com/webscr?cmd=_ap-payment&paykey=",
-        response.pay_key
-      ].join
+      case checkout_type
+      when "mobile"
+        mobile_payment_url(response)
+      else # for default "desktop" and as a fallback
+        desktop_payment_url(response)
+      end
     end
 
     private
@@ -130,6 +144,24 @@ module AdaptivePayments
         "https://svcs.",
         ("sandbox." if sandbox?),
         "paypal.com/AdaptivePayments"
+      ].join
+    end
+
+    def desktop_payment_url(response)
+      [
+        "https://www.",
+        ("sandbox." if sandbox?),
+        "paypal.com/webscr?cmd=_ap-payment&paykey=",
+        response.pay_key
+      ].join
+    end
+
+    def mobile_payment_url(response)
+      [
+        "https://www.",
+        ("sandbox." if sandbox?),
+        "paypal.com/webapps/adaptivepayment/flow/pay?expType=mini&paykey=",
+        response.pay_key
       ].join
     end
 

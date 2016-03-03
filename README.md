@@ -30,7 +30,7 @@ fields are available.
 The following example should give you enough of an idea to be able to
 follow your senses and use this gem in your own applications.
 
-### Taking a regular payment
+### <a name="regular_payment"></a> Taking a regular payment
 
 A typical checkout payment request starts like this.
 
@@ -239,6 +239,20 @@ end
 
 You can also do partial refunds by passing an `amount` field in the request.
 
+### <a name="mobile_checkout"></a>Taking a regular payment with a responsive mobile checkout
+Implementation is practically identical to [regular payment](#regular_payment), but an additional :checkout_type attribute must be provided to Client initializer.
+
+```ruby
+client = AdaptivePayments::Client.new(
+  :user_id       => "your-api-user-id",
+  :password      => "your-api-password",
+  :signature     => "your-api-signature",
+  :app_id        => "your-app-id",
+  :sandbox       => true,
+  :checkout_type => "mobile" # this does the trick
+)
+```
+
 ### Other API calls
 
 Adaptive Payments is a very extensive API with a lot of endpoints and a lot
@@ -255,6 +269,7 @@ request/response classes in this repository to get a feel for how this all works
 * [d11wtq](https://github.com/d11wtq)
 * [Maxim-Filimonov](https://github.com/Maxim-Filimonov)
 * [hajder](https://github.com/hajder)
+* [Epigene](https://github.com/Epigene)
 
 ## License & Copyright
 

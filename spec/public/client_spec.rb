@@ -25,6 +25,21 @@ describe AdaptivePayments::Client do
     client.execute(request)
   end
 
+  it "initializes with :checkout_type set to 'desktop'" do
+    expect(client.checkout_type).to eq 'desktop'
+  end
+
+  describe "#mobile?" do
+    it "should return false for default client" do
+      expect(client.mobile?).to eq false
+    end
+
+    it "should return true for clients specifically initialized as mobile" do
+      @client = set_up_client(false, true)
+      expect(@client.mobile?).to eq true
+    end
+  end
+
   it "sends the user ID in the headers to the endpoint" do
     client.user_id = "a.user.id"
     expect(RestClient::Resource).to receive(:new) \
@@ -94,4 +109,35 @@ describe AdaptivePayments::Client do
     client.execute(request) { |r| ret_val = r }
     expect(ret_val).to eq(response)
   end
+
+  describe "#payment_url(response)" do
+    before :all do
+      @response = set_up_mock_response
+    end
+
+    context "sandbox" do
+      it "should return correct sandbox desktop checkout url" do
+        @client = set_up_client(true, false)
+        expect(@client.payment_url(@response)).to eq "https://www.sandbox.paypal.com/webscr?cmd=_ap-payment&paykey=ABCD-1234"
+      end
+
+      it "should return correct sandbox mobile checkout url" do
+        @client = set_up_client(true, true)
+        expect(@client.payment_url(@response)).to eq "https://www.sandbox.paypal.com/webapps/adaptivepayment/flow/pay?expType=mini&paykey=ABCD-1234"
+      end
+    end
+
+    context "production" do
+      it "should return correct production desktop checkout url" do
+        @client = set_up_client(false, false)
+        expect(@client.payment_url(@response)).to eq "https://www.paypal.com/webscr?cmd=_ap-payment&paykey=ABCD-1234"
+      end
+
+      it "should return correct production mobile checkout url" do
+        @client = set_up_client(false, true)
+        expect(@client.payment_url(@response)).to eq "https://www.paypal.com/webapps/adaptivepayment/flow/pay?expType=mini&paykey=ABCD-1234"
+      end
+    end
+  end
+
 end
