@@ -165,13 +165,13 @@ module AdaptivePayments
       ].join
     end
 
-    def headers
+    def headers      
       base_headers = {
         "X-PAYPAL-RESPONSE-DATA-FORMAT" => "JSON",
         "X-PAYPAL-REQUEST-DATA-FORMAT"  => "JSON"
       }
       attribute_set.inject(base_headers) do |hash, attr|
-        next hash if self[attr.name].nil?
+        next hash if self[attr.name].nil? || attr.options[:header].nil?
         hash.merge(attr.options[:header] => self[attr.name])
       end
     end

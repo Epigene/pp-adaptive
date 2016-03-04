@@ -140,4 +140,12 @@ describe AdaptivePayments::Client do
     end
   end
 
+  #privates
+  describe "#headers" do
+    it "should never contain a nil key" do
+      header_hash = client.send(:headers)
+      expect(header_hash.keys.include?(nil)).to eq false
+    end
+  end
+
 end
