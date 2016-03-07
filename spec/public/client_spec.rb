@@ -130,7 +130,7 @@ describe AdaptivePayments::Client do
     context "production" do
       it "should return correct production desktop checkout url" do
         @client = set_up_client(false, false)
-        expect(@client.payment_url(@response)).to eq "https://www.paypal.com/webscr?cmd=_ap-payment&paykey=ABCD-1234"
+        expect(@client.payment_url(@response)).to eq "https://www.paypal.com/webscr?cmd=_ap-payment&paykey=ABCD-1234"        
       end
 
       it "should return correct production mobile checkout url" do
