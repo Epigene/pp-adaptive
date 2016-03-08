@@ -105,6 +105,91 @@ module AdaptivePayments
       raise AdaptivePayments::Exception, e
     end
 
+    # Execute an express handshake ("SetExpressCheckout") Request.
+    #
+    # @example
+    #   response = client.express_handshake(email: "test@example.com", receiver_amount: 0.51, currency_code: "USD", return_url: "https://www.example.com/return_path", cancel_url: "https://www.example.com/cancel_path" )
+    #   puts response
+    #   => "TOKEN=EC%2d32P548528Y663714N&TIMESTAMP=2016%2d03%2d08T11%3a39%3a34Z&CORRELATIONID=51efed895c8a8&ACK=Success&VERSION=124&BUILD=18316154"
+    #
+    # @return [String]
+    #   a response object for the given operation
+    #
+    # @yield [String]
+    #   optional way to receive the return value
+    def express_handshake(options)
+      hash = {
+        "USER" => user_id,
+        "PWD" => password,
+        "SIGNATURE" => signature,
+        "METHOD" => "SetExpressCheckout",
+        "SOLUTIONTYPE" => "Sole",
+        "LANDINGPAGE" => "Billing",
+        "VERSION" => 124, # this may increase in the future
+        "EMAIL" => options[:email],
+        "PAYMENTREQUEST_0_PAYMENTACTION" => "SALE",
+        "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
+        "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code],
+        "RETURNURL" => options[:return_url], # URL of your payment confirmation page \
+        "CANCELURL" => options[:cancel_url] # URL redirect if customer cancels payment
+      }
+
+      response = post_to_express_endpoint(hash)
+
+      yield response if block_given?
+    rescue RestClient::Exception => e
+      raise AdaptivePayments::Exception, e
+    end
+
+    # Execute an express handshake ("SetExpressCheckout") Request.
+    #
+    # @example
+    #   response = client.express_perform(receiver_amount: 0.51, currency_code: "USD", token: "token_returned_with_user_from_paypal", PayerID: "id_returned_with_user_from_paypal"  )
+    #   puts response
+    #   => "TOKEN=EC%2d77X70771J7730413M&SUCCESSPAGEREDIRECTREQUESTED=false&TIMESTAMP=2016%2d03%2d08T11%3a22%3a13Z&CORRELATIONID=46f0eef897abd&ACK=Success&VERSION=124&BUILD=18316154&INSURANCEOPTIONSELECTED=false&SHIPPINGOPTIONISDEFAULT=false&PAYMENTINFO_0_TRANSACTIONID=1BG7064136737244V&PAYMENTINFO_0_TRANSACTIONTYPE=expresscheckout&PAYMENTINFO_0_PAYMENTTYPE=instant&PAYMENTINFO_0_ORDERTIME=2016%2d03%2d08T11%3a22%3a12Z&PAYMENTINFO_0_AMT=49%2e95&PAYMENTINFO_0_TAXAMT=0%2e00&PAYMENTINFO_0_CURRENCYCODE=EUR&PAYMENTINFO_0_PAYMENTSTATUS=Pending&PAYMENTINFO_0_PENDINGREASON=multicurrency&PAYMENTINFO_0_REASONCODE=None&PAYMENTINFO_0_PROTECTIONELIGIBILITY=Ineligible&PAYMENTINFO_0_PROTECTIONELIGIBILITYTYPE=None&PAYMENTINFO_0_SECUREMERCHANTACCOUNTID=97HKEN2K8JCZY&PAYMENTINFO_0_ERRORCODE=0&PAYMENTINFO_0_ACK=Success"
+    #
+    # @return [String]
+    #   a response object for the given operation
+    #
+    # @yield [String]
+    #   optional way to receive the return value
+    def express_perform(options)
+      hash = {
+        "USER" => user_id,
+        "PWD" => password,
+        "SIGNATURE" => signature,
+        "METHOD" => "DoExpressCheckoutPayment",
+        "VERSION" => 124,
+        "TOKEN" => options[:token],
+        "PAYERID" => options[:PayerID],
+        "PAYMENTREQUEST_0_PAYMENTACTION" => "SALE",
+        "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
+        "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code]
+      }
+
+      response = post_to_express_endpoint(hash)
+
+      yield response if block_given?
+    rescue RestClient::Exception => e
+      raise AdaptivePayments::Exception, e
+    end
+
+    # / TODO # When initiating a preapproval, get the URL on paypal.com to send the user to.
+    #
+    # @param [PreapprovalResponse] response
+    #   the response when setting up the preapproval
+    #
+    # @return [String]
+    #   the URL on paypal.com to send the user to
+    def preapproval_url(response)
+      [
+        "https://www.",
+        ("sandbox." if sandbox?),
+        "paypal.com/webscr?cmd=_ap-preapproval&preapprovalkey=",
+        response.preapproval_key
+      ].join
+    end
+
     # When initiating a preapproval, get the URL on paypal.com to send the user to.
     #
     # @param [PreapprovalResponse] response
@@ -137,7 +222,15 @@ module AdaptivePayments
       end
     end
 
+    def express_checkout_url(token)
+      "https://www.#{sandbox? ? "sandbox." : ""}paypal.com/cgi-bin/webscr?cmd=_express-checkout&useraction=commit&token=#{token}"
+    end
+
     private
+
+    def post_to_express_endpoint(hash)
+      return RestClient.post("https://api-3t.#{sandbox? ? "sandbox." : ""}paypal.com/nvp", hash)
+    end
 
     def api_url
       [
@@ -165,7 +258,7 @@ module AdaptivePayments
       ].join
     end
 
-    def headers      
+    def headers
       base_headers = {
         "X-PAYPAL-RESPONSE-DATA-FORMAT" => "JSON",
         "X-PAYPAL-REQUEST-DATA-FORMAT"  => "JSON"
