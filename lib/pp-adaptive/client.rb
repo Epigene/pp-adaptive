@@ -123,15 +123,16 @@ module AdaptivePayments
         "PWD" => password,
         "SIGNATURE" => signature,
         "METHOD" => "SetExpressCheckout",
+        "RETURNURL" => options[:return_url], # URL of your payment confirmation page
+        "CANCELURL" => options[:cancel_url], # URL redirect if customer cancels payment
+        "VERSION" => 124, # this may increase in the future
         "SOLUTIONTYPE" => "Sole",
         "LANDINGPAGE" => "Billing",
-        "VERSION" => 124, # this may increase in the future
         "EMAIL" => options[:email],
+        "PAYMENTREQUEST_0_SELLERPAYPALACCOUNTID" => email, # explictly set what paypal account will recieve the payment
         "PAYMENTREQUEST_0_PAYMENTACTION" => "SALE",
         "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
         "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code],
-        "RETURNURL" => options[:return_url], # URL of your payment confirmation page \
-        "CANCELURL" => options[:cancel_url] # URL redirect if customer cancels payment
       }
 
       response = post_to_express_endpoint(hash)
@@ -162,6 +163,7 @@ module AdaptivePayments
         "VERSION" => 124,
         "TOKEN" => options[:token],
         "PAYERID" => options[:PayerID],
+        "PAYMENTREQUEST_0_SELLERPAYPALACCOUNTID" => email, # explictly set what paypal account will recieve the payment
         "PAYMENTREQUEST_0_PAYMENTACTION" => "SALE",
         "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
         "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code]
