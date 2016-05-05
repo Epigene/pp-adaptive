@@ -133,6 +133,7 @@ module AdaptivePayments
         "PAYMENTREQUEST_0_PAYMENTACTION" => "SALE",
         "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
         "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code],
+        "SUBJECT" => options[:receiver_email]
       }
 
       response = post_to_express_endpoint(hash)
@@ -166,7 +167,8 @@ module AdaptivePayments
         "PAYMENTREQUEST_0_SELLERPAYPALACCOUNTID" => options[:receiver_email], # explictly set what paypal account will recieve the payment
         "PAYMENTREQUEST_0_PAYMENTACTION" => "SALE",
         "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
-        "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code]
+        "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code],
+        "SUBJECT" => options[:receiver_email]
       }
 
       response = post_to_express_endpoint(hash)
