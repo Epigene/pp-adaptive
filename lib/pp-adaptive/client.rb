@@ -129,7 +129,7 @@ module AdaptivePayments
         "SOLUTIONTYPE" => "Sole",
         "LANDINGPAGE" => "Billing",
         "EMAIL" => options[:email],
-        "PAYMENTREQUEST_0_SELLERPAYPALACCOUNTID" => email, # explictly set what paypal account will recieve the payment
+        "PAYMENTREQUEST_0_SELLERPAYPALACCOUNTID" => options[:receiver_email], # explictly set what paypal account will recieve the payment
         "PAYMENTREQUEST_0_PAYMENTACTION" => "SALE",
         "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
         "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code],
@@ -163,7 +163,7 @@ module AdaptivePayments
         "VERSION" => 124,
         "TOKEN" => options[:token],
         "PAYERID" => options[:PayerID],
-        "PAYMENTREQUEST_0_SELLERPAYPALACCOUNTID" => email, # explictly set what paypal account will recieve the payment
+        "PAYMENTREQUEST_0_SELLERPAYPALACCOUNTID" => options[:receiver_email], # explictly set what paypal account will recieve the payment
         "PAYMENTREQUEST_0_PAYMENTACTION" => "SALE",
         "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
         "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code]
