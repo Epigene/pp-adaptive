@@ -3,15 +3,15 @@ $:.push File.expand_path("../lib", __FILE__)
 require "pp-adaptive/version"
 
 Gem::Specification.new do |s|
-  s.name        = "pp-adaptive"
+  s.name        = "creative-pp-adaptive"
   s.version     = AdaptivePayments::VERSION
-  s.authors     = ["d11wtq"]
-  s.email       = ["chris@w3style.co.uk"]
-  s.homepage    = "https://github.com/flippa/pp-adaptive"
+  s.authors     = ["d11wtq, Epigene, Sacristan, CreativeGS"]
+  s.email       = ["hi@creative.gs"]
+  s.homepage    = "https://github.com/CreativeGS/pp-adaptive"
   s.summary     = %q{Rubygem for working with PayPal's Adaptive Payments API}
   s.description = %q{Provides complete access to PayPal's Adaptive Payments API}
 
-  s.rubyforge_project = "pp-adaptive"
+  s.rubyforge_project = "creative-pp-adaptive"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
