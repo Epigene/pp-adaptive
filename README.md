@@ -30,7 +30,7 @@ fields are available.
 The following example should give you enough of an idea to be able to
 follow your senses and use this gem in your own applications.
 
-### Taking a regular payment
+### <a name="regular_payment"></a> Taking a regular payment
 
 A typical checkout payment request starts like this.
 
@@ -239,6 +239,45 @@ end
 
 You can also do partial refunds by passing an `amount` field in the request.
 
+### <a name="mobile_checkout"></a>Taking a regular payment with a responsive mobile checkout
+Mobile checkouts uses the [Mobile Express Checkout](https://developer.paypal.com/docs/classic/express-checkout/ht_ec-singleItemPayment-curl-etc/) setup, an alternative to adaptive API.  
+The difference is that there is a first POST to paypal to retrieve a token, then a redirect to PayPal, and finally, another POST to paypal after user accepts the payment to finalize the deal.
+
+Please consult `client.rb#express_handshake` and `client.rb#express_perform` for details on what options to pass and what to expect in response.
+
+A TODO is to wrap the response strings in more functional response objects.
+
+```ruby
+# 1. initialize @client with the optional :checkout_type attribute
+@client = AdaptivePayments::Client.new(
+  :user_id       => "your-api-user-id",
+  :password      => "your-api-password",
+  :signature     => "your-api-signature",
+  :app_id        => "your-app-id",
+  :sandbox       => true,
+  :checkout_type => "mobile" # this does the trick
+)
+
+# 2. call the handshake method and obtain the token
+@client.express_handshake(options) do |response|
+  token = response.split("&").select{|param| param["TOKEN="].present?}.first.split("=").last
+  if token.present?
+    # do some transaction logging
+    redirect_to @client.express_checkout_url(token))
+  else
+    render json: response
+  end
+end
+
+# User does his thing at PayPal here
+
+# 3. process PayPal return GET parameters at success_path
+@client.express_perform(options)) do |response|  
+  success = response["ACK=Success"].present? ? true : false
+  # use success boolean to process logging, order updates  
+end      
+```
+
 ### Other API calls
 
 Adaptive Payments is a very extensive API with a lot of endpoints and a lot
@@ -255,6 +294,7 @@ request/response classes in this repository to get a feel for how this all works
 * [d11wtq](https://github.com/d11wtq)
 * [Maxim-Filimonov](https://github.com/Maxim-Filimonov)
 * [hajder](https://github.com/hajder)
+* [Epigene](https://github.com/Epigene)
 
 ## License & Copyright
 
