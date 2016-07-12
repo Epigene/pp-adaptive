@@ -1,3 +1,11 @@
+require 'simplecov'
+
+SimpleCov.start do
+  add_filter '/spec/'
+
+  #add_group 'Lib', 'lib/'
+end
+
 require "bundler/setup"
 require "pp-adaptive"
 require "pry"
@@ -10,7 +18,7 @@ def set_up_client(sandbox=false, mobile=false)
   @client = AdaptivePayments::Client.new(
     sandbox: (sandbox ? true : false ),
     checkout_type: (mobile ? "mobile" : "desktop")
-  )  
+  )
   return @client
 end
 
