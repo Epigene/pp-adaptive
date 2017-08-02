@@ -134,7 +134,7 @@ module AdaptivePayments
 
     private
     def express_query_params(options)
-      allcaps_options = options.select{ |k, v| k[%r'\A[[:upper:]]+\z'].present? }
+      allcaps_options = options.select{ |k, v| k[%r'\A[[:upper:]]+\z'] }
 
       {
         "USER" => user_id,
