@@ -246,7 +246,9 @@ module AdaptivePayments
     private
 
     def post_to_express_endpoint(hash)
-      return RestClient.post("https://api-3t.#{sandbox? ? "sandbox." : ""}paypal.com/nvp", hash)
+      uri = "https://api-3t.#{sandbox? ? "sandbox." : ""}paypal.com/nvp"
+      puts "#post_to_express_endpoint calling RestCLient.post with (#{uri}, #{hash})" if hash["VERBOSE"] == true
+      return RestClient.post(uri, hash)
     end
 
     def api_url
