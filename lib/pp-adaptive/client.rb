@@ -118,7 +118,25 @@ module AdaptivePayments
     # @yield [String]
     #   optional way to receive the return value
     def express_handshake(options)
-      hash = {
+      hash = express_query_params(options)
+
+      # makes outside request
+      response = post_to_express_endpoint(hash)
+
+      if block_given?
+        yield response
+      else
+        response
+      end
+    rescue RestClient::Exception => e
+      raise AdaptivePayments::Exception, e
+    end
+
+    private
+    def express_query_params(options)
+      allcaps_options = options.select{ |k, v| k[%r'\A[[:upper:]]+\z'].present? }
+
+      {
         "USER" => user_id,
         "PWD" => password,
         "SIGNATURE" => signature,
@@ -134,14 +152,9 @@ module AdaptivePayments
         "PAYMENTREQUEST_0_AMT" => options[:receiver_amount],
         "PAYMENTREQUEST_0_CURRENCYCODE" => options[:currency_code],
         "SUBJECT" => options[:receiver_email]
-      }
-
-      response = post_to_express_endpoint(hash)
-
-      yield response if block_given?
-    rescue RestClient::Exception => e
-      raise AdaptivePayments::Exception, e
+      }.merge(allcaps_options)
     end
+    public
 
     # Execute an express handshake ("SetExpressCheckout") Request.
     #

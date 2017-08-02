@@ -1,5 +1,4 @@
-require "spec_helper"
-
+# rspec spec/public/client_spec.rb
 describe AdaptivePayments::Client do
   let(:rest_client)   { double(:post => '{}').tap { |d| allow(d).to receive_messages(:[] => d) } }
   let(:request_class) { double(:operation => :Refund, :build_response => nil) }
@@ -8,6 +7,36 @@ describe AdaptivePayments::Client do
 
   before(:each) do
     allow(RestClient::Resource).to receive(:new).and_return(rest_client)
+  end
+
+  describe "#express_handshake(options)" do
+    subject { client.express_handshake(options) }
+
+    context "when called with no block and some custom allcaps string keys" do
+      let(:options) do
+        {
+          email: "email@test.com",
+          return_url: "https://test.com/ok",
+          cancel_url: "https://test.com/error",
+          receiver_email: "receiver@test.com",
+          receiver_amount: "100",
+          currency_code: "EUR",
+          "LOCALECODE" => "ES",
+          "SUBJECT" => "overriden subject",
+        }
+      end
+
+      let(:exp) do
+        hash_including("LOCALECODE" => "ES", "SUBJECT" => "overriden subject")
+      end
+
+      it "triggers :post_to_express_endpoint with options correctly processed, allcaps correctly overriding defaults and returns the response" do
+        allow(client).to receive(:post_to_express_endpoint).and_return("test response")
+        expect(client).to receive(:post_to_express_endpoint).once.with(exp)
+
+        subject
+      end
+    end
   end
 
   it "uses the production endpoint by default" do
@@ -130,7 +159,7 @@ describe AdaptivePayments::Client do
     context "production" do
       it "should return correct production desktop checkout url" do
         @client = set_up_client(false, false)
-        expect(@client.payment_url(@response)).to eq "https://www.paypal.com/webscr?cmd=_ap-payment&paykey=ABCD-1234"        
+        expect(@client.payment_url(@response)).to eq "https://www.paypal.com/webscr?cmd=_ap-payment&paykey=ABCD-1234"
       end
 
       it "should return correct production mobile checkout url" do
