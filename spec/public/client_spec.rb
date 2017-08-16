@@ -34,7 +34,7 @@ describe AdaptivePayments::Client do
         allow(client).to receive(:post_to_express_endpoint).and_return("test response")
         expect(client).to receive(:post_to_express_endpoint).once.with(exp)
 
-        subject
+        expect(subject).to eq("test response")
       end
     end
   end
