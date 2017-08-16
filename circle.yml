@@ -1,4 +1,0 @@
-machine:
-  ruby:
-    version: 2.1.2
-  timezone: "Europe/Riga"
